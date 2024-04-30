@@ -1,11 +1,8 @@
-version: '3'
-
 networks:
   laravel:
 
 volumes:
-  local_pgdata:
-  pgadmin-data:
+  mysql_data:
 
 services:
   app:
@@ -22,36 +19,38 @@ services:
     depends_on:
       - php
       - redis
-      - postgres
+      - mysql
       - mailhog
     networks:
       - laravel
 
-  postgres:
-    image: postgres
-    tty: true
-    ports:
-      - "5432:5432"
+  mysql:
+    image: mysql:latest
+    restart: always
     environment:
-      POSTGRES_PASSWORD: "root"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: codeacademy_laravel
+      MYSQL_PASSWORD: root
+    ports:
+      - "3307:3306"
     volumes:
-      - local_pgdata:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     networks:
       - laravel
 
-  pgadmin:
-    image: dpage/pgadmin4
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: "codeacademy@3cplus.com"
-      PGADMIN_DEFAULT_PASSWORD: "codeacademy"
-    ports:
-      - "16543:80"
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
     depends_on:
-      - postgres
+      - mysql
+    ports:
+      - "8087:80"
     networks:
       - laravel
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
 
   php:
     build:
@@ -112,7 +111,7 @@ services:
     volumes:
       - ./src:/var/www/html:delegated
     depends_on:
-      - postgres
+      - mysql
     entrypoint: [ 'php', '/var/www/html/artisan' ]
     networks:
       - laravel
