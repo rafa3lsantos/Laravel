@@ -2,10 +2,8 @@
 
 namespace App\Repositories;
 
-use App\DTO\{
-    CreateSupportDTO,
-    UpdateSupportDTO
-};
+use App\DTO\Supports\CreateSupportDTO;
+use App\DTO\Supports\UpdateSupportDTO;
 use App\Models\Support;
 use App\Repositories\SupportRepositoryInterface;
 use stdClass;
@@ -31,11 +29,11 @@ use stdClass;
         
         public function findOne(string $id): stdClass|null
         {
-            $support = (object) $this->model->find($id);
+            $support = $this->model->find($id);
+
             if(!$support) {
                 return null;
             }
-
             return (object) $support->toArray();
         }
         
